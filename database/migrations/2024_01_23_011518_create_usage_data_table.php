@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('usage_data', function (Blueprint $table) {
             $table->id();
-            $table->integer('billing_period');
+            $table->date('date');
+            $table->string('item_name');
             $table->integer('total_units')->nullable();
             $table->integer('total_minutes')->nullable();
             $table->integer('total_letters')->nullable();

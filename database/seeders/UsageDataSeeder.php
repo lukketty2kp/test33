@@ -18,7 +18,8 @@ class UsageDataSeeder extends Seeder
 
         for ($day = 1; $day <= $totalDays; $day++) {
             DB::table('usage_data')->insert([
-                'billing_period' => $day,
+                'date' => now()->subDays($day),
+                'item_name' => 'Item ' . $day,
                 'total_units' => rand(50, 200),
                 'total_minutes' => rand(200, 600),
                 'total_letters' => rand(5000, 15000),
