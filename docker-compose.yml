@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+  invoice-server:
+    image: nginx:stable-alpine
+    container_name: 'invoice-server'
+    volumes:
+      - ${INVOICE_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ${INVOICE_BASEPATH:-.}/:/var/www/html/
+    ports:
+      - ${INVOICE_PORT:-8084:80}
+    networks:
+      - invoice-network
+      - app-network
+    command: nginx -g "daemon off;"
+
+  invoice-php:
+    build: ${INVOICE_BASEPATH:-.}/docker/php
+    container_name: 'invoice'
+    volumes:
+      - ${INVOICE_BASEPATH:-.}/:/var/www/html/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - invoice-network
+      - app-network
+
+  invoice-db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    tty: true
+    environment:
+      MYSQL_DATABASE: 'invoice'
+      MYSQL_USER: 'invoice'
+      MYSQL_PASSWORD: 'invoice'
+      MYSQL_ROOT_PASSWORD: 'invoice'
+    ports:
+      - '3306:3306'
+    volumes:
+      - invoice-db:/var/lib/mysql
+      - ${INVOICE_BASEPATH:-.}/src/data/:/home/
+    networks:
+      - invoice-network
+
+networks:
+  app-network:
+    driver: bridge
+  invoice-network:
+    driver: bridge
+
+volumes:
+  invoice-db:
+    driver: 'local'
+  invoice-redis:
+    driver: 'local'
+  invoice-s3:
+    driver: 'local'
